@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include <algorithm>
 
 using namespace std;
 
@@ -113,19 +114,120 @@ void gestionarStock(vector<Producto>& inventario, bool esEntrada) {
     cout << "Error: Producto con ID " << id << " no encontrado.\n";
 }
 
+// Nueva Funcionalidad 1: Buscar producto por ID
+void buscarProducto(const vector<Producto>& inventario) {
+    int id;
+    cout << "\n=== BUSCAR PRODUCTO POR ID ===\n";
+    cout << "Ingrese el ID del producto a buscar: ";
+    if (!(cin >> id)) {
+        cout << "ID invalido.\n";
+        limpiarBuffer();
+        return;
+    }
+
+    for (const auto& p : inventario) {
+        if (p.id == id) {
+            cout << "\n>> Producto Encontrado:\n";
+            cout << "ID: " << p.id << "\n";
+            cout << "Nombre: " << p.nombre << "\n";
+            cout << "Categoria: " << p.categoria << "\n";
+            cout << "Cantidad en stock: " << p.cantidad << "\n";
+            cout << "Precio unitario: $" << p.precio << "\n";
+            return;
+        }
+    }
+    cout << "Error: No se encontro ningun producto con el ID " << id << ".\n";
+}
+
+// Nueva Funcionalidad 2: Eliminar producto
+void eliminarProducto(vector<Producto>& inventario) {
+    int id;
+    cout << "\n=== ELIMINAR PRODUCTO ===\n";
+    cout << "Ingrese el ID del producto que desea eliminar: ";
+    if (!(cin >> id)) {
+        cout << "ID invalido.\n";
+        limpiarBuffer();
+        return;
+    }
+
+    for (auto it = inventario.begin(); it != inventario.end(); ++it) {
+        if (it->id == id) {
+            cout << "Producto encontrado: " << it->nombre << ". Esta seguro de eliminarlo? (1. Si / 2. No): ";
+            int confirmacion;
+            cin >> confirmacion;
+            if (confirmacion == 1) {
+                inventario.erase(it);
+                cout << ">> Producto eliminado exitosamente.\n";
+            }
+            else {
+                cout << "Operacion cancelada.\n";
+            }
+            return;
+        }
+    }
+    cout << "Error: Producto con ID " << id << " no encontrado.\n";
+}
+
+// Nueva Funcionalidad 3: Calcular valor total del inventario
+void calcularValorInventario(const vector<Producto>& inventario) {
+    cout << "\n=== VALOR TOTAL DEL INVENTARIO ===\n";
+    if (inventario.empty()) {
+        cout << "El inventario esta vacio.\n";
+        return;
+    }
+
+    double valorTotal = 0.0;
+    int totalItems = 0;
+    for (const auto& p : inventario) {
+        valorTotal += (p.cantidad * p.precio);
+        totalItems += p.cantidad;
+    }
+
+    cout << "Total de unidades en bodega: " << totalItems << "\n";
+    cout << "Valor economico total del inventario: $" << valorTotal << "\n";
+}
+
+// Nueva Funcionalidad 4: Reporte de stock bajo (<= 5 unidades)
+void reporteStockBajo(const vector<Producto>& inventario) {
+    cout << "\n=== REPORTE DE PRODUCTOS CON STOCK BAJO (<= 5) ===\n";
+    if (inventario.empty()) {
+        cout << "El inventario esta vacio.\n";
+        return;
+    }
+
+    bool encontrado = false;
+    cout << "ID\t| Nombre\t\t| Categoria\t| Cantidad\n";
+    cout << "--------------------------------------------------------\n";
+    for (const auto& p : inventario) {
+        if (p.cantidad <= 5) {
+            cout << p.id << "\t| " << p.nombre << "\t\t| "
+                << p.categoria << "\t| " << p.cantidad << "\n";
+            encontrado = true;
+        }
+    }
+
+    if (!encontrado) {
+        cout << "Excelente! No hay productos con stock bajo en este momento.\n";
+    }
+}
+
 int main() {
     vector<Producto> inventario;
     int opcion;
 
     do {
-        cout << "\n=========================================\n";
-        cout << "  SISTEMA DE INVENTARIO Y BODEGA (v1.0)  \n";
-        cout << "=========================================\n";
+        cout << "\n=================================================\n";
+        cout << "    SISTEMA DE INVENTARIO Y BODEGA (v2.0)        \n";
+        cout << "=================================================\n";
         cout << "1. Registrar Producto\n";
         cout << "2. Mostrar Inventario\n";
         cout << "3. Registrar Entrada de Stock\n";
         cout << "4. Registrar Salida de Stock\n";
-        cout << "5. Salir\n";
+        cout << "5. Buscar Producto por ID\n";
+        cout << "6. Eliminar Producto\n";
+        cout << "7. Ver Valor Total del Inventario\n";
+        cout << "8. Reporte de Stock Bajo\n";
+        cout << "9. Salir\n";
         cout << "Seleccione una opcion: ";
 
         if (!(cin >> opcion)) {
@@ -139,10 +241,14 @@ int main() {
         case 2: mostrarInventario(inventario); break;
         case 3: gestionarStock(inventario, true); break;
         case 4: gestionarStock(inventario, false); break;
-        case 5: cout << "Saliendo del sistema...\n"; break;
+        case 5: buscarProducto(inventario); break;
+        case 6: eliminarProducto(inventario); break;
+        case 7: calcularValorInventario(inventario); break;
+        case 8: reporteStockBajo(inventario); break;
+        case 9: cout << "Saliendo del sistema...\n"; break;
         default: cout << "Opcion no valida.\n"; break;
         }
-    } while (opcion != 5);
+    } while (opcion != 9);
 
     return 0;
 }
